@@ -7,6 +7,13 @@ import numpy as np
 import streamlit as st
 from PIL import Image
 
+import subprocess
+import sys
+from pathlib import Path
+
+import chromadb
+from huggingface_hub import hf_hub_download
+
 from config import CLASS_NAMES
 from model_inference import load_model, predict_single_image, _preprocess, _device
 from gradcam import GradCAMPlusPlus, overlay_heatmap
@@ -224,9 +231,70 @@ st.markdown(
 def get_model():
     return load_model()
 
+def ensure_knowledge_base():
+    """Ensure the WHO ChromaDB collection exists and contains evidence."""
+
+    project_dir = Path(__file__).resolve().parent
+    db_path = project_dir / "chroma_db"
+    pdf_path = project_dir / "who_cns_2021.pdf"
+    indexer_path = project_dir / "01_index_who_cns.py"
+
+    client = chromadb.PersistentClient(path=str(db_path))
+
+    collections = client.list_collections()
+    names = {
+        c.name if hasattr(c, "name") else c
+        for c in collections
+    }
+
+    if "who_cns_2021" in names:
+        collection = client.get_collection("who_cns_2021")
+        if collection.count() > 0:
+            print(
+                f"WHO knowledge base ready: "
+                f"{collection.count()} chunks"
+            )
+            return
+
+    # Download the manually uploaded PDF if it is not already present.
+    if not pdf_path.exists():
+        print("Downloading WHO CNS reference PDF from Hugging Face...")
+
+        hf_hub_download(
+            repo_id="Bhagawati08/NeuroLensAI",
+            filename="who_cns_2021.pdf",
+            repo_type="model",
+            local_dir=str(project_dir),
+        )
+
+    if not indexer_path.exists():
+        raise FileNotFoundError(
+            f"WHO indexer not found: {indexer_path}"
+        )
+
+    print("Building WHO CNS ChromaDB knowledge base...")
+
+    subprocess.run(
+        [sys.executable, str(indexer_path)],
+        cwd=str(project_dir),
+        check=True,
+    )
+
+    # Fail startup if indexing did not produce usable evidence.
+    client = chromadb.PersistentClient(path=str(db_path))
+    collection = client.get_collection("who_cns_2021")
+
+    if collection.count() == 0:
+        raise RuntimeError(
+            "WHO knowledge base was created but contains no chunks."
+        )
+
+    print(f"WHO knowledge base ready: {collection.count()} chunks")
+
 
 @st.cache_resource
 def get_agents():
+    ensure_knowledge_base()
     return (
         RetrieverAgent(),
         SynthesizerAgent(),
