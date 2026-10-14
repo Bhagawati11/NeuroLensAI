@@ -6,6 +6,9 @@ if you retrain) — update these three constants after your final run, don't
 bury them inside model_inference.py.
 """
 
+HF_MODEL_REPO = "Bhagawati08/NeuroLensAI"
+HF_MODEL_FILENAME = "best_efficientnet_b3.pth"
+
 CLASS_NAMES = ["glioma", "meningioma", "notumor", "pituitary"]  # must match your training label order exactly
 
 CHECKPOINT_PATH = "best_efficientnet_b3.pth"

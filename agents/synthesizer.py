@@ -16,6 +16,8 @@ from google import genai
 from google.genai import types
 
 MODEL = "gemini-3.5-flash-lite" 
+HF_MODEL_REPO = "Bhagawati08/NeuroLensAI"
+HF_MODEL_FILENAME = "best_efficientnet_b3.pth"
 
 SYSTEM_PROMPT = """You are a report-drafting assistant for a research prototype brain-tumor MRI \
 classification system. You are NOT a doctor and this is NOT a clinical product — it is an academic \

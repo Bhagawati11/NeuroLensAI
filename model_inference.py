@@ -24,6 +24,7 @@ everything downstream (predict_single_image) only needs the model to accept
 a [1, 3, 300, 300] tensor and return [1, 4] logits.
 """
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -31,9 +32,12 @@ from torchvision import models, transforms
 from PIL import Image
 
 from config import (
-    CLASS_NAMES, CHECKPOINT_PATH, TEMPERATURE, THETA_STAR,
+    CLASS_NAMES, CHECKPOINT_PATH, TEMPERATURE, THETA_STAR,HF_MODEL_REPO,
+    HF_MODEL_FILENAME,
     MC_DROPOUT_PASSES, IMAGE_SIZE, IMAGENET_MEAN, IMAGENET_STD,
 )
+
+from huggingface_hub import hf_hub_download
 
 _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -53,10 +57,26 @@ def build_model(num_classes: int = 4) -> nn.Module:
 
 
 def load_model(checkpoint_path: str = CHECKPOINT_PATH) -> nn.Module:
-    model = build_model(num_classes=len(CLASS_NAMES))
-    state_dict = torch.load(checkpoint_path, map_location=_device)
+    # Use the local checkpoint if it exists.
+    # Otherwise, download it from the public Hugging Face repository.
+    if os.path.isfile(checkpoint_path):
+        resolved_checkpoint = checkpoint_path
+    else:
+        resolved_checkpoint = hf_hub_download(
+            repo_id=HF_MODEL_REPO,
+            filename=HF_MODEL_FILENAME,
+            repo_type="model",
+        )
 
-    # handles both a raw state_dict and a dict wrapping it (e.g. {"model_state_dict": ...})
+    model = build_model(num_classes=len(CLASS_NAMES))
+
+    state_dict = torch.load(
+        resolved_checkpoint,
+        map_location=_device,
+        weights_only=True,
+    )
+
+    # Support either a raw state_dict or a wrapped state_dict.
     if isinstance(state_dict, dict) and "model_state_dict" in state_dict:
         state_dict = state_dict["model_state_dict"]
 
