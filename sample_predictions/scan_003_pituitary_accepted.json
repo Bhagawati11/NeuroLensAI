@@ -1,0 +1,13 @@
+{
+  "scan_id": "scan_003",
+  "status": "ACCEPTED",
+  "predicted_class": "pituitary",
+  "calibrated_confidence": 0.98,
+  "predictive_entropy": 0.02,
+  "spatial_features": {
+    "laterality": "midline",
+    "anatomical_zone": "sellar region",
+    "relative_area_percentage": 2.1,
+    "boundary_type": "well-defined"
+  }
+}

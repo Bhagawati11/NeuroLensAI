@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Generated results and vector database
+results/
+chroma_db/
+
+# Large local artifacts — hosted separately
+best_efficientnet_b3.pth
+who_cns_2021.pdf
+
+# Local caches
+.cache/
+huggingface_cache/

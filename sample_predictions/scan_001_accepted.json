@@ -1,0 +1,13 @@
+{
+  "scan_id": "scan_001",
+  "status": "ACCEPTED",
+  "predicted_class": "meningioma",
+  "calibrated_confidence": 0.94,
+  "predictive_entropy": 0.03,
+  "spatial_features": {
+    "laterality": "left",
+    "anatomical_zone": "frontal lobe",
+    "relative_area_percentage": 4.2,
+    "boundary_type": "well-defined"
+  }
+}

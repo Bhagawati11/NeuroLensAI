@@ -1,0 +1,7 @@
+{
+  "scan_id": "scan_002",
+  "status": "DEFERRED",
+  "predictive_entropy": 0.41,
+  "top_classes": ["glioma", "meningioma"],
+  "message": "Predictive entropy exceeded validation-tuned threshold theta*=0.0669; deferred for clinician review."
+}
